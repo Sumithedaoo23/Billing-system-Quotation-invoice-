@@ -1,6 +1,5 @@
 # Billing-system-Quotation-invoice-
 <img width="1552" height="364" alt="Screenshot 2025-11-15 173847" src="https://github.com/user-attachments/assets/6ab371a0-70f9-4cdd-9079-644d062f2c90" />
-<img width="826" height="929" alt="Screenshot 2025-11-15 173908" src="https://github.com/user-attachments/assets/4e8f2cf4-d02d-41e1-b78b-8f0e391ff4d7" />
 <img width="899" height="867" alt="Screenshot 2025-11-15 173925" src="https://github.com/user-attachments/assets/257291e2-0804-479e-89f5-8f1e3457a72c" />
 <img width="825" height="926" alt="Screenshot 2025-11-15 173944" src="https://github.com/user-attachments/assets/ec235716-820d-4e41-9dd9-1d7434a8eab0" />
 <img width="423" height="807" alt="Screenshot 2025-11-15 173958" src="https://github.com/user-attachments/assets/4b6dd65f-cd3a-4061-8924-82333bae7aea" />
