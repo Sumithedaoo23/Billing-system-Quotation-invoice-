@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karmic Nexus Billing System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --main-blue: #004d66;
+            --light-grey: #f0f0f0;
+            --text-color: #333;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .profile-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .profile-card {
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-container, .quotation-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-header {
+            background-color: var(--main-blue);
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .invoice-body, .quotation-body {
+            padding: 30px;
+        }
+        
+        .invoice-footer {
+            background-color: var(--light-grey);
+            padding: 20px;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .table th {
+            background-color: #e9ecef;
+        }
+        
+        .btn-primary {
+            background-color: var(--main-blue);
+            border-color: var(--main-blue);
+        }
+        
+        .btn-success {
+            background-color: #34a853;
+            border-color: #34a853;
+        }
+        
+        .karmic-logo {
+            font-weight: bold;
+            font-size: 24px;
+            color: var(--main-blue);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .profile-icon {
+            font-size: 48px;
+            color: var(--main-blue);
+            margin-bottom: 15px;
+        }
+        
+        .invoice-preview, .quotation-preview {
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: white;
+            margin-top: 20px;
+        }
+        
+        /* Invoice Template Styles */
+        .invoice-template {
+            width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            font-size: 10px;
+        }
+        
+        .invoice-header-template {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .logo-section {
+            width: 40%;
+            text-align: left;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background-color: var(--main-blue);
+            margin-right: 5px;
+        }
+        
+        .company-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--main-blue);
+        }
+        
+        .tax-invoice-title {
+            width: 60%;
+            text-align: right;
+        }
+        
+        .tax-invoice-title h1 {
+            font-size: 30px;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .invoice-details {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .details-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .seller-info, .bill-to-info {
+            width: 48%;
+            font-size: 11px;
+        }
+        
+        .seller-info strong, .bill-to-info strong {
+            font-size: 12px;
+            color: var(--text-color);
+            display: block;
+            margin-bottom: 3px;
+        }
+        
+        .seller-info .company-details {
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+        
+        .bill-to-info .company-details {
+            font-weight: bold;
+            font-size: 12px;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+        
+        .bill-label {
+            font-weight: bold;
+            color: var(--text-color);
+            display: block;
+            margin-bottom: 3px;
+        }
+        
+        .bill-to-info p, .seller-info p {
+            margin: 0 0 2px 0;
+            line-height: 1.4;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .info-col {
+            width: 32%;
+            font-size: 11px;
+        }
+        
+        .info-col div {
+            border: 1px solid #ccc;
+            padding: 5px;
+            height: 20px;
+        }
+        
+        .info-col label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .item-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .item-table th, .item-table td {
+            border: 1px solid #ccc;
+            padding: 8px 5px;
+            text-align: center;
+        }
+        
+        .item-table th {
+            background-color: var(--light-grey);
+            color: var(--text-color);
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        
+        .item-table .col-hash { width: 3%; }
+        .item-table .col-desc { width: 35%; text-align: left; }
+        .item-table .col-hsn { width: 12%; }
+        .item-table .col-qty { width: 8%; }
+        .item-table .col-rate { width: 12%; }
+        .item-table .col-sgst, .item-table .col-cgst, .item-table .col-cess { width: 8%; }
+        .item-table .col-amount { width: 14%; }
+        
+        .item-table tr:nth-child(n+2) td {
+            height: 20px;
+        }
+        
+        .watermark {
+            text-align: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: rgba(0, 77, 102, 0.1);
+            margin: 40px 0;
+            user-select: none;
+            position: absolute;
+            width: 100%;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: -1;
+            letter-spacing: 2px;
+        }
+        
+        .invoice-content-area {
+            position: relative;
+        }
+        
+        .totals-bank-area {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .amount-in-words, .bank-details, .terms-conditions {
+            width: 60%;
+        }
+        
+        .total-amounts {
+            width: 35%;
+            font-size: 11px;
+        }
+        
+        .amount-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+        }
+        
+        .amount-line .label {
+            font-weight: bold;
+        }
+        
+        .amount-line .value {
+            text-align: right;
+        }
+        
+        .total-box {
+            border: 2px solid var(--text-color);
+            padding: 8px;
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: var(--light-grey);
+        }
+        
+        .amount-chargeable-box {
+            border-bottom: 1px solid var(--text-color);
+            height: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .bank-details strong {
+            font-size: 12px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .bank-details p {
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        .note {
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 3px solid var(--main-blue);
+            background-color: #f7fafd;
+        }
+        
+        .note strong {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+        
+        .declaration strong {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+        
+        .footer-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 20px;
+        }
+        
+        .qr-code-box {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ccc;
+            text-align: center;
+            line-height: 100px;
+            font-size: 8px;
+        }
+        
+        .authorised-signature {
+            width: 50%;
+            text-align: right;
+            border-top: 1px solid #ccc;
+            padding-top: 5px;
+            font-size: 10px;
+        }
+        
+        .bottom-bar {
+            background-color: var(--main-blue);
+            color: white;
+            padding: 10px 0;
+            margin-top: 20px;
+            font-size: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .bottom-bar span {
+            font-weight: bold;
+        }
+        
+        /* Quotation Template Styles */
+        .quotation-template {
+            width: 8.5in;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            min-height: 11in;
+            position: relative;
+            overflow: hidden;
+            page-break-after: always;
+        }
+
+        .quotation-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-right: 20px;
+            padding-top: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .quotation-logo-left {
+            background-color: #011d3d;
+            color: white;
+            padding: 10px 20px 30px 40px;
+            clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);
+            font-size: 1.2em;
+            line-height: 1.2;
+            width: 300px;
+            box-sizing: border-box;
+        }
+
+        .quotation-logo-left h1 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .quotation-logo-left .tagline {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .quotation-logo-right {
+            text-align: right;
+            width: 150px;
+        }
+
+        .quotation-logo-right .logo-placeholder {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .quotation-logo-right .logo-placeholder-text {
+             font-size: 0.7em;
+             color: #011d3d;
+        }
+
+        .quotation-content {
+            padding: 0 40px;
+            position: relative;
+            z-index: 1;
+            color: #333;
+        }
+
+        .quotation-recipient-info {
+            margin-top: 20px;
+            line-height: 1.8;
+            font-size: 0.9em;
+        }
+
+        .placeholder-line {
+            border-bottom: 1px dashed #ccc;
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .quotation-project-details {
+            margin-top: 30px;
+        }
+
+        .quotation-project-details h2 {
+            color: #007bff;
+            font-size: 1.2em;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .quotation-project-details h3 {
+             color: #007bff;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .quotation-description-list {
+            list-style-type: disc;
+            margin: 10px 0 20px 20px;
+            padding: 0;
+            line-height: 1.5;
+            min-height: 60px;
+        }
+
+        .quotation-description-list li {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .quotation-pricing-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .quotation-pricing-table th, .quotation-pricing-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            min-height: 40px;
+        }
+
+        .quotation-pricing-table th {
+            background-color: #e9ecef;
+            font-weight: bold;
+            color: #011d3d;
+            border-top: 2px solid #007bff;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .quotation-pricing-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .quotation-pricing-table .amount-col {
+            text-align: right;
+            width: 120px;
+        }
+
+        .quotation-pricing-table .total-row td {
+            background-color: #e9ecef;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .quotation-pricing-table .total-row .amount-col {
+            text-align: right;
+            border-top: 3px solid #007bff;
+        }
+
+        .quotation-terms-page {
+            margin-top: 60px;
+            padding: 0 40px;
+            color: #333;
+        }
+
+        .quotation-terms-page h3 {
+             font-size: 1.2em;
+            color: #011d3d;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+        .quotation-terms-list {
+            list-style-type: decimal;
+            padding-left: 20px;
+            line-height: 1.6;
+            font-size: 0.9em;
+        }
+
+        .quotation-terms-list li {
+            margin-bottom: 15px;
+        }
+
+        .quotation-terms-list li strong {
+            font-weight: bold;
+        }
+
+        .quotation-terms-list .urgent-note {
+            display: block;
+            margin-top: 5px;
+            font-style: italic;
+            font-size: 0.9em;
+            color: #d9534f;
+        }
+        
+        .term-placeholder {
+            border-bottom: 1px dashed #ccc;
+            display: inline-block;
+            width: 50px;
+            margin: 0 5px;
+        }
+
+        .quotation-contact-info {
+            position: absolute;
+            bottom: 60px;
+            left: 40px;
+            z-index: 5;
+            color: white;
+        }
+
+        .quotation-contact-info h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .quotation-contact-info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            line-height: 1.6;
+            font-size: 0.9em;
+            color: white;
+        }
+        
+        .quotation-footer-bg-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #021e3f 0%, #084078 100%);
+            clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 100%);
+            z-index: 0;
+        }
+        
+        .quotation-container.page-2 .quotation-contact-info {
+             position: static;
+             margin-top: 40px;
+             padding: 0 40px;
+        }
+        
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginPage" class="container">
+        <div class="login-container">
+            <div class="text-center mb-4">
+                <h1 class="karmic-logo">KARMIC NEXUS</h1>
+                <p class="text-muted">IT Solutions Billing System</p>
+            </div>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="profilePage" class="container hidden">
+        <div class="profile-container">
+            <div class="text-center mb-5">
+                <h1 class="karmic-logo">KARMIC NEXUS</h1>
+                <p class="text-muted">Select your profile</p>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card profile-card h-100" onclick="selectProfile('admin')">
+                        <div class="card-body text-center p-4">
+                            <div class="profile-icon">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <h5 class="card-title">Admin</h5>
+                            <p class="card-text">Full access to all features and settings</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card profile-card h-100" onclick="selectProfile('accountant')">
+                        <div class="card-body text-center p-4">
+                            <div class="profile-icon">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <h5 class="card-title">Accountant</h5>
+                            <p class="card-text">Create and manage invoices and quotations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <button class="btn btn-outline-secondary" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> Back to Login
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboardPage" class="container hidden">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand karmic-logo" href="#">KARMIC NEXUS</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="logout()">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-invoice fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Create Invoice</h5>
+                        <p class="card-text">Generate professional tax invoices</p>
+                        <button class="btn btn-primary" onclick="showInvoiceForm()">Create Now</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Create Quotation</h5>
+                        <p class="card-text">Generate price quotations for clients</p>
+                        <button class="btn btn-success" onclick="showQuotationForm()">Create Now</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-history fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Recent Documents</h5>
+                        <p class="card-text">View and manage recent invoices and quotations</p>
+                        <button class="btn btn-info">View History</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="invoicePage" class="container hidden">
+        <nav class="navbar navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand karmic-logo" href="#">Create Invoice</a>
+                <button class="btn btn-outline-primary" onclick="goBackToDashboard()">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            </div>
+        </nav>
+        
+        <div class="invoice-container">
+            <div class="invoice-body">
+                <form id="invoiceForm">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="invoiceNumber" class="form-label">Invoice #</label>
+                                <input type="text" class="form-control" id="invoiceNumber" value="INV-0KM-025" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="invoiceDate" class="form-label">Invoice Date</label>
+                                <input type="date" class="form-control" id="invoiceDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="dueDate" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="dueDate" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="clientName" class="form-label">Bill To (Company Name)</label>
+                                <input type="text" class="form-control" id="clientName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="clientAddress" class="form-label">Address</label>
+                                <textarea class="form-control" id="clientAddress" rows="2" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="clientGST" class="form-label">GSTIN</label>
+                                <input type="text" class="form-control" id="clientGST">
+                            </div>
+                            <div class="mb-3">
+                                <label for="placeOfSupply" class="form-label">Place of Supply</label>
+                                <input type="text" class="form-control" id="placeOfSupply" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h5 class="mb-3">Items</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered" id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Description</th>
+                                    <th>HSN/SAC</th>
+                                    <th>Qty</th>
+                                    <th>Rate</th>
+                                    <th>SGST %</th>
+                                    <th>CGST %</th>
+                                    <th>Cess %</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><input type="text" class="form-control form-control-sm" placeholder="Item description"></td>
+                                    <td><input type="text" class="form-control form-control-sm" placeholder="HSN Code"></td>
+                                    <td><input type="number" class="form-control form-control-sm" placeholder="Qty" min="1"></td>
+                                    <td><input type="number" class="form-control form-control-sm" placeholder="Rate" min="0" step="0.01"></td>
+                                    <td><input type="number" class="form-control form-control-sm" placeholder="SGST %" min="0" step="0.01"></td>
+                                    <td><input type="number" class="form-control form-control-sm" placeholder="CGST %" min="0" step="0.01"></td>
+                                    <td><input type="number" class="form-control form-control-sm" placeholder="Cess %" min="0" step="0.01"></td>
+                                    <td><input type="number" class="form-control form-control-sm" placeholder="Amount" readonly></td>
+                                    <td><button type="button" class="btn btn-sm btn-danger" onclick="removeItem(this)"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-primary" onclick="addItem()">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="amountInWords" class="form-label">Amount Chargeable (in words)</label>
+                                <input type="text" class="form-control" id="amountInWords" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="subTotal" class="form-label">Sub Total</label>
+                                <input type="number" class="form-control" id="subTotal" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sgstAmount" class="form-label">SGST Amount</label>
+                                <input type="number" class="form-control" id="sgstAmount" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cgstAmount" class="form-label">CGST Amount</label>
+                                <input type="number" class="form-control" id="cgstAmount" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cessAmount" class="form-label">Cess Amount</label>
+                                <input type="number" class="form-control" id="cessAmount" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="totalAmount" class="form-label">Total Amount</label>
+                                <input type="number" class="form-control" id="totalAmount" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Note</label>
+                        <textarea class="form-control" id="note" rows="2">Kindly note that invoice INV ______ for ______ Services Provided remains unpaid. We request at least 50% payment to avoid service interruptions.</textarea>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary me-2" onclick="previewInvoice()">Preview Invoice</button>
+                        <button type="button" class="btn btn-success" onclick="generatePDF()">Generate & Download PDF</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div id="invoicePreview" class="invoice-preview hidden mt-5">
+            <div class="text-center mb-4">
+                <h3>Invoice Preview</h3>
+            </div>
+            <div id="previewContent">
+                </div>
+            <div class="text-center mt-4">
+                <button type="button" class="btn btn-primary me-2" onclick="editInvoice()">Edit Invoice</button>
+                <button type="button" class="btn btn-success" onclick="downloadPDF()">Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="quotationPage" class="container hidden">
+        <nav class="navbar navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand karmic-logo" href="#">Create Quotation</a>
+                <button class="btn btn-outline-primary" onclick="goBackToDashboard()">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            </div>
+        </nav>
+        
+        <div class="quotation-container">
+            <div class="quotation-body">
+                <form id="quotationForm">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="quotationNumber" class="form-label">Quotation #</label>
+                                <input type="text" class="form-control" id="quotationNumber" value="QT-0KM-001" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="quotationDate" class="form-label">Quotation Date</label>
+                                <input type="date" class="form-control" id="quotationDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="validUntil" class="form-label">Valid Until</label>
+                                <input type="date" class="form-control" id="validUntil" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="quotationClientName" class="form-label">To (Company/Client Name)</label>
+                                <input type="text" class="form-control" id="quotationClientName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="quotationClientAddress" class="form-label">Address</label>
+                                <textarea class="form-control" id="quotationClientAddress" rows="2" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="projectName" class="form-label">Project Name</label>
+                                <input type="text" class="form-control" id="projectName" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="projectDescription" class="form-label">Project Description</label>
+                        <textarea class="form-control" id="projectDescription" rows="3" placeholder="Describe the project in detail"></textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Project Features (Point Wise)</label>
+                        <div id="featuresList">
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" placeholder="Feature description">
+                                <button type="button" class="btn btn-outline-danger" onclick="removeFeature(this)"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addFeature()">
+                            <i class="fas fa-plus"></i> Add Feature
+                        </button>
+                    </div>
+                    
+                    <h5 class="mb-3">Pricing</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered" id="quotationItemsTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Feature</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><input type="text" class="form-control form-control-sm" placeholder="Feature name"></td>
+                                    <td><input type="text" class="form-control form-control-sm" placeholder="Feature description"></td>
+                                    <td><input type="number" class="form-control form-control-sm" placeholder="Amount" min="0" step="0.01"></td>
+                                    <td><button type="button" class="btn btn-sm btn-danger" onclick="removeQuotationItem(this)"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-primary" onclick="addQuotationItem()">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="quotationTotal" class="form-label">Total Amount</label>
+                                <input type="number" class="form-control" id="quotationTotal" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="timelineDays" class="form-label">Timeline (Days)</label>
+                                <input type="number" class="form-control" id="timelineDays" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="timelineMonths" class="form-label">Timeline (Months)</label>
+                                <input type="number" class="form-control" id="timelineMonths" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="advancePercentage" class="form-label">Advance Payment Percentage</label>
+                        <input type="number" class="form-control" id="advancePercentage" min="0" max="100" value="50">
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary me-2" onclick="previewQuotation()">Preview Quotation</button>
+                        <button type="button" class="btn btn-success" onclick="generateQuotationPDF()">Generate & Download PDF</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div id="quotationPreview" class="quotation-preview hidden mt-5">
+            <div class="text-center mb-4">
+                <h3>Quotation Preview</h3>
+            </div>
+            <div id="quotationPreviewContent">
+                </div>
+            <div class="text-center mt-4">
+                <button type="button" class="btn btn-primary me-2" onclick="editQuotation()">Edit Quotation</button>
+                <button type="button" class="btn btn-success" onclick="downloadQuotationPDF()">Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentUser = null;
+        let currentProfile = null;
+        let itemCount = 1;
+        let quotationItemCount = 1;
+        let featureCount = 1;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as default for invoice date
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('invoiceDate').value = formattedDate;
+            document.getElementById('quotationDate').value = formattedDate;
+            
+            // Set due date to 30 days from today
+            const dueDate = new Date();
+            dueDate.setDate(today.getDate() + 30);
+            const formattedDueDate = dueDate.toISOString().split('T')[0];
+            document.getElementById('dueDate').value = formattedDueDate;
+            document.getElementById('validUntil').value = formattedDueDate;
+            
+            // Add event listeners for calculating amounts
+            document.querySelectorAll('#itemsTable input').forEach(input => {
+                if (input.type === 'number' && !input.readOnly) {
+                    input.addEventListener('input', calculateRowAmount);
+                }
+            });
+            
+            // Add event listeners for calculating quotation amounts
+            document.querySelectorAll('#quotationItemsTable input').forEach(input => {
+                if (input.type === 'number' && !input.readOnly) {
+                    input.addEventListener('input', calculateQuotationTotal);
+                }
+            });
+        });
+
+        // --- Navigation Functions ---
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple validation - in a real app, this would connect to a backend
+            if (email && password) {
+                currentUser = email;
+                showPage('profilePage');
+            } else {
+                alert('Please enter both email and password');
+            }
+        });
+
+        // Profile selection
+        function selectProfile(profile) {
+            currentProfile = profile;
+            showPage('dashboardPage');
+        }
+
+        // Navigation functions
+        function showPage(pageId) {
+            document.querySelectorAll('.container').forEach(page => {
+                page.classList.add('hidden');
+            });
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        function goBack() {
+            showPage('loginPage');
+        }
+
+        function goBackToDashboard() {
+            showPage('dashboardPage');
+        }
+
+        function logout() {
+            currentUser = null;
+            currentProfile = null;
+            showPage('loginPage');
+        }
+
+        // Invoice functions
+        function showInvoiceForm() {
+            showPage('invoicePage');
+        }
+
+        function showQuotationForm() {
+            showPage('quotationPage');
+        }
+
+        // --- Item Management and Calculation ---
+
+        function addItem() {
+            itemCount++;
+            const table = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            
+            newRow.innerHTML = `
+                <td>${itemCount}</td>
+                <td><input type="text" class="form-control form-control-sm" placeholder="Item description"></td>
+                <td><input type="text" class="form-control form-control-sm" placeholder="HSN Code"></td>
+                <td><input type="number" class="form-control form-control-sm" placeholder="Qty" min="1"></td>
+                <td><input type="number" class="form-control form-control-sm" placeholder="Rate" min="0" step="0.01"></td>
+                <td><input type="number" class="form-control form-control-sm" placeholder="SGST %" min="0" step="0.01"></td>
+                <td><input type="number" class="form-control form-control-sm" placeholder="CGST %" min="0" step="0.01"></td>
+                <td><input type="number" class="form-control form-control-sm" placeholder="Cess %" min="0" step="0.01"></td>
+                <td><input type="number" class="form-control form-control-sm" placeholder="Amount" readonly></td>
+                <td><button type="button" class="btn btn-sm btn-danger" onclick="removeItem(this)"><i class="fas fa-trash"></i></button></td>
+            `;
+            
+            // Add event listeners to new inputs
+            newRow.querySelectorAll('input').forEach(input => {
+                if (input.type === 'number' && !input.readOnly) {
+                    input.addEventListener('input', calculateRowAmount);
+                }
+            });
+        }
+
+        function removeItem(button) {
+            const row = button.closest('tr');
+            row.remove();
+            // Update row numbers
+            const table = document.getElementById('itemsTable');
+            const rows = table.getElementsByTagName('tbody')[0].rows;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].cells[0].textContent = i + 1;
+            }
+            itemCount = rows.length;
+            calculateTotals();
+        }
+
+        function calculateRowAmount(event) {
+            const row = event.target.closest('tr');
+            const qty = parseFloat(row.cells[3].querySelector('input').value) || 0;
+            const rate = parseFloat(row.cells[4].querySelector('input').value) || 0;
+            const sgst = parseFloat(row.cells[5].querySelector('input').value) || 0;
+            const cgst = parseFloat(row.cells[6].querySelector('input').value) || 0;
+            const cess = parseFloat(row.cells[7].querySelector('input').value) || 0;
+            
+            const baseAmount = qty * rate;
+            const sgstAmount = baseAmount * (sgst / 100);
+            const cgstAmount = baseAmount * (cgst / 100);
+            const cessAmount = baseAmount * (cess / 100);
+            const totalAmount = baseAmount + sgstAmount + cgstAmount + cessAmount;
+            
+            row.cells[8].querySelector('input').value = totalAmount.toFixed(2);
+            
+            calculateTotals();
+        }
+
+        function calculateTotals() {
+            let subTotal = 0;
+            let sgstTotal = 0;
+            let cgstTotal = 0;
+            let cessTotal = 0;
+            
+            const table = document.getElementById('itemsTable');
+            const rows = table.getElementsByTagName('tbody')[0].rows;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const qty = parseFloat(row.cells[3].querySelector('input').value) || 0;
+                const rate = parseFloat(row.cells[4].querySelector('input').value) || 0;
+                const sgst = parseFloat(row.cells[5].querySelector('input').value) || 0;
+                const cgst = parseFloat(row.cells[6].querySelector('input').value) || 0;
+                const cess = parseFloat(row.cells[7].querySelector('input').value) || 0;
+                
+                const baseAmount = qty * rate;
+                subTotal += baseAmount;
+                sgstTotal += baseAmount * (sgst / 100);
+                cgstTotal += baseAmount * (cgst / 100);
+                cessTotal += baseAmount * (cess / 100);
+            }
+            
+            const totalAmount = subTotal + sgstTotal + cgstTotal + cessTotal;
+            
+            document.getElementById('subTotal').value = subTotal.toFixed(2);
+            document.getElementById('sgstAmount').value = sgstTotal.toFixed(2);
+            document.getElementById('cgstAmount').value = cgstTotal.toFixed(2);
+            document.getElementById('cessAmount').value = cessTotal.toFixed(2);
+            document.getElementById('totalAmount').value = totalAmount.toFixed(2);
+            
+            // Update amount in words
+            document.getElementById('amountInWords').value = numberToWords(totalAmount);
+        }
+
+        function numberToWords(num) {
+            // Updated Indian Number System (Lakh/Crore) conversion - more robust
+            const number = Math.floor(num);
+            const decimal = Math.round((num - number) * 100);
+
+            const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+            const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const numToWords = (n, s) => {
+                let str = '';
+                if (n >= 10000000) {
+                    str += numToWords(Math.floor(n / 10000000), 'Crore ');
+                    n %= 10000000;
+                }
+                if (n >= 100000) {
+                    str += numToWords(Math.floor(n / 100000), 'Lakh ');
+                    n %= 100000;
+                }
+                if (n >= 1000) {
+                    str += numToWords(Math.floor(n / 1000), 'Thousand ');
+                    n %= 1000;
+                }
+                if (n >= 100) {
+                    str += ones[Math.floor(n / 100)] + ' Hundred ';
+                    n %= 100;
+                }
+                if (n >= 20) {
+                    str += tens[Math.floor(n / 10)] + ' ';
+                    n %= 10;
+                } else if (n >= 10) {
+                    str += teens[n - 10] + ' ';
+                    n = 0;
+                }
+                if (n > 0) {
+                    str += ones[n] + ' ';
+                }
+                return str ? str + s : str;
+            };
+
+            let words = numToWords(number, 'Rupees').trim();
+            if (decimal > 0) {
+                words += ' and ' + numToWords(decimal, 'Paise').trim();
+            }
+
+            return words.trim() + ' Only' || 'Zero Rupees Only';
+        }
+
+        // --- Quotation Functions ---
+
+        function addFeature() {
+            featureCount++;
+            const featuresList = document.getElementById('featuresList');
+            const newFeature = document.createElement('div');
+            newFeature.className = 'input-group mb-2';
+            newFeature.innerHTML = `
+                <input type="text" class="form-control" placeholder="Feature description">
+                <button type="button" class="btn btn-outline-danger" onclick="removeFeature(this)"><i class="fas fa-trash"></i></button>
+            `;
+            featuresList.appendChild(newFeature);
+        }
+
+        function removeFeature(button) {
+            if (featureCount > 1) {
+                button.closest('.input-group').remove();
+                featureCount--;
+            }
+        }
+
+        function addQuotationItem() {
+            quotationItemCount++;
+            const table = document.getElementById('quotationItemsTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            
+            newRow.innerHTML = `
+                <td>${quotationItemCount}</td>
+                <td><input type="text" class="form-control form-control-sm" placeholder="Feature name"></td>
+                <td><input type="text" class="form-control form-control-sm" placeholder="Feature description"></td>
+                <td><input type="number" class="form-control form-control-sm" placeholder="Amount" min="0" step="0.01"></td>
+                <td><button type="button" class="btn btn-sm btn-danger" onclick="removeQuotationItem(this)"><i class="fas fa-trash"></i></button></td>
+            `;
+            
+            // Add event listeners to new inputs
+            newRow.querySelectorAll('input').forEach(input => {
+                if (input.type === 'number' && !input.readOnly) {
+                    input.addEventListener('input', calculateQuotationTotal);
+                }
+            });
+        }
+
+        function removeQuotationItem(button) {
+            const row = button.closest('tr');
+            row.remove();
+            // Update row numbers
+            const table = document.getElementById('quotationItemsTable');
+            const rows = table.getElementsByTagName('tbody')[0].rows;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].cells[0].textContent = i + 1;
+            }
+            quotationItemCount = rows.length;
+            calculateQuotationTotal();
+        }
+
+        function calculateQuotationTotal() {
+            let total = 0;
+            
+            const table = document.getElementById('quotationItemsTable');
+            const rows = table.getElementsByTagName('tbody')[0].rows;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const amount = parseFloat(row.cells[3].querySelector('input').value) || 0;
+                total += amount;
+            }
+            
+            document.getElementById('quotationTotal').value = total.toFixed(2);
+        }
+
+        // --- PDF Generation Functions ---
+
+        function previewInvoice() {
+            // Ensure calculations are up-to-date
+            calculateTotals(); 
+
+            // Collect all form data
+            const invoiceData = {
+                invoiceNumber: document.getElementById('invoiceNumber').value,
+                invoiceDate: document.getElementById('invoiceDate').value,
+                dueDate: document.getElementById('dueDate').value,
+                clientName: document.getElementById('clientName').value,
+                clientAddress: document.getElementById('clientAddress').value,
+                clientGST: document.getElementById('clientGST').value,
+                placeOfSupply: document.getElementById('placeOfSupply').value,
+                amountInWords: document.getElementById('amountInWords').value,
+                subTotal: document.getElementById('subTotal').value,
+                sgstAmount: document.getElementById('sgstAmount').value,
+                cgstAmount: document.getElementById('cgstAmount').value,
+                cessAmount: document.getElementById('cessAmount').value,
+                totalAmount: document.getElementById('totalAmount').value,
+                note: document.getElementById('note').value,
+                items: []
+            };
+            
+            // Collect items
+            const table = document.getElementById('itemsTable');
+            const rows = table.getElementsByTagName('tbody')[0].rows;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const item = {
+                    description: row.cells[1].querySelector('input').value,
+                    hsn: row.cells[2].querySelector('input').value,
+                    qty: row.cells[3].querySelector('input').value,
+                    rate: row.cells[4].querySelector('input').value,
+                    sgst: row.cells[5].querySelector('input').value,
+                    cgst: row.cells[6].querySelector('input').value,
+                    cess: row.cells[7].querySelector('input').value,
+                    amount: row.cells[8].querySelector('input').value
+                };
+                // Only push valid rows (items with descriptions, quantity, or rate)
+                if (item.description || parseFloat(item.qty) > 0 || parseFloat(item.rate) > 0) {
+                    invoiceData.items.push(item);
+                }
+            }
+            
+            // Generate preview HTML
+            const previewContent = document.getElementById('previewContent');
+            previewContent.innerHTML = generateInvoiceHTML(invoiceData);
+            
+            // Show preview
+            document.getElementById('invoicePreview').classList.remove('hidden');
+            document.getElementById('invoiceForm').classList.add('hidden');
+        }
+
+        function generateInvoiceHTML(data) {
+            let itemsHTML = '';
+            data.items.forEach((item, index) => {
+                itemsHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td style="text-align: left;">${item.description}</td>
+                        <td>${item.hsn}</td>
+                        <td>${item.qty}</td>
+                        <td>${item.rate}</td>
+                        <td>${item.sgst}%</td>
+                        <td>${item.cgst}%</td>
+                        <td>${item.cess}%</td>
+                        <td>${item.amount}</td>
+                    </tr>
+                `;
+            });
+
+            // Add empty rows to match the original layout (3 total rows in the image)
+            const MIN_ROWS = 3;
+            const emptyRowCount = Math.max(0, MIN_ROWS - data.items.length);
+            for (let i = 0; i < emptyRowCount; i++) {
+                itemsHTML += `<tr><td></td><td style="text-align: left;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            }
+            
+            return `
+                <div class="invoice-template">
+                    <div class="invoice-header-template">
+                        <div class="logo-section">
+                            <div class="logo">
+                                <div class="logo-box"></div>
+                                <span class="company-name">Karmic Nexus IT Solutions</span>
+                            </div>
+                            <p>Plot no. 98, Sahakar nagar, Manewada road,</p>
+                            <p>Nagpur - 440027</p>
+                            <p><strong>GSTIN - 27ERZPA9595L1ZI</strong></p>
+                            <p>MSME - UDYAM-MH-20-0184835</p>
+                        </div>
+
+                        <div class="tax-invoice-title">
+                            <h1>TAX INVOICE</h1>
+                            <div class="invoice-details">
+                                <p>Invoice# ${data.invoiceNumber}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-section">
+                        <div class="bill-to-info">
+                            <p class="bill-label">Bill To:</p>
+                            <p class="company-details">${data.clientName || 'Company Name'}</p>
+                            <p>${data.clientAddress.replace(/\n/g, '<br>') || 'Address'}</p>
+                            <p><strong>GSTIN - ${data.clientGST || 'GSTIN'}</strong></p>
+                            <p>Place of Supply: ${data.placeOfSupply || 'Place of Supply'}</p>
+                        </div>
+                        <div class="bill-to-info" style="visibility: hidden;"></div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-col">
+                            <label>Invoice Date :</label>
+                            <div>${formatDate(data.invoiceDate)}</div>
+                        </div>
+                        <div class="info-col">
+                            <label>Due Date :</label>
+                            <div>${formatDate(data.dueDate)}</div>
+                        </div>
+                        <div class="info-col" style="visibility: hidden;"></div>
+                    </div>
+                    
+                    <div class="invoice-content-area">
+                        <div class="watermark">KARMIC NEXUS</div>
+                        <table class="item-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-hash">#</th>
+                                    <th class="col-desc">Item Description</th>
+                                    <th class="col-hsn">HSN/SAC</th>
+                                    <th class="col-qty">Qty.</th>
+                                    <th class="col-rate">Rate</th>
+                                    <th class="col-sgst">SGST</th>
+                                    <th class="col-cgst">CGST</th>
+                                    <th class="col-cess">Cess</th>
+                                    <th class="col-amount">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHTML}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="totals-bank-area">
+                        <div class="left-col">
+                            <div class="amount-in-words">
+                                <p><strong>Amount Chargeable (in words):</strong></p>
+                                <div class="amount-chargeable-box">${data.amountInWords}</div>
+                                <div class="amount-chargeable-box"></div>
+                                <div class="amount-chargeable-box" style="width: 70%; margin-bottom: 20px;"></div>
+                            </div>
+
+                            <div class="bank-details">
+                                <strong>Company's Bank Details</strong>
+                                <p>Bank Name : Kotak Mahindra Bank</p>
+                                <p>A/c No. : 7947486959</p>
+                                <p>Branch & IFSC Code : Medical Square, IFSC- KKBK0001839</p>
+                                <p>for Ms. Manjiri Dinesh Alone</p>
+                            </div>
+                            
+                            <div class="note">
+                                <strong>Note</strong>
+                                ${data.note.replace('INV ______ for ______', `INV ${data.invoiceNumber} for ${data.clientName}`)}
+                            </div>
+
+                            <div class="terms-conditions">
+                                <strong>Terms & Conditions</strong>
+                                <p><strong>Declaration</strong>: This invoice reflects the true price of the professional service provided. We affirm compliance with MSME regulations. Payment should be made within the MSME stipulated timeframe; any delay will incur interest per the MSME Act. Disputes shall be resolved under Nagpur jurisdiction. We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.</p>
+                            </div>
+                        </div>
+
+                        <div class="total-amounts">
+                            <div class="amount-line">
+                                <span class="label">Sub Total</span>
+                                <span class="value">₹${data.subTotal}</span>
+                            </div>
+                            <div class="amount-line">
+                                <span class="label">SGST (9%)</span>
+                                <span class="value">₹${data.sgstAmount}</span>
+                            </div>
+                            <div class="amount-line">
+                                <span class="label">CGST (9%)</span>
+                                <span class="value">₹${data.cgstAmount}</span>
+                            </div>
+                            <div class="amount-line" style="margin-bottom: 10px;">
+                                <span class="label">Cess</span>
+                                <span class="value">₹${data.cessAmount}</span>
+                            </div>
+                            
+                            <div class="total-box">
+                                <span>TOTAL</span>
+                                <span>₹${data.totalAmount}</span>
+                            </div>
+                            
+                            <div class="footer-area">
+                                <div class="qr-code-box">QR Code Here</div>
+                                <div class="authorised-signature">
+                                    Authorised Signatory
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bottom-bar">
+                        <span>Contact Us:</span>
+                        <span>8080420394 | 9527895390</span>
+                        <span>karmicnexus.contact@gmail.com</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function previewQuotation() {
+            // Ensure calculations are up-to-date
+            calculateQuotationTotal(); 
+
+            // Collect all form data
+            const quotationData = {
+                quotationNumber: document.getElementById('quotationNumber').value,
+                quotationDate: document.getElementById('quotationDate').value,
+                validUntil: document.getElementById('validUntil').value,
+                clientName: document.getElementById('quotationClientName').value,
+                clientAddress: document.getElementById('quotationClientAddress').value,
+                projectName: document.getElementById('projectName').value,
+                projectDescription: document.getElementById('projectDescription').value,
+                timelineDays: document.getElementById('timelineDays').value,
+                timelineMonths: document.getElementById('timelineMonths').value,
+                advancePercentage: document.getElementById('advancePercentage').value,
+                totalAmount: document.getElementById('quotationTotal').value,
+                features: [],
+                items: []
+            };
+            
+            // Collect features
+            const featuresList = document.getElementById('featuresList');
+            const featureInputs = featuresList.querySelectorAll('input');
+            featureInputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    quotationData.features.push(input.value);
+                }
+            });
+            
+            // Collect items
+            const table = document.getElementById('quotationItemsTable');
+            const rows = table.getElementsByTagName('tbody')[0].rows;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const item = {
+                    feature: row.cells[1].querySelector('input').value,
+                    description: row.cells[2].querySelector('input').value,
+                    amount: row.cells[3].querySelector('input').value
+                };
+                // Only push valid rows (items with feature, description, or amount)
+                if (item.feature || item.description || parseFloat(item.amount) > 0) {
+                    quotationData.items.push(item);
+                }
+            }
+            
+            // Generate preview HTML
+            const previewContent = document.getElementById('quotationPreviewContent');
+            previewContent.innerHTML = generateQuotationHTML(quotationData);
+            
+            // Show preview
+            document.getElementById('quotationPreview').classList.remove('hidden');
+            document.getElementById('quotationForm').classList.add('hidden');
+        }
+
+        function generateQuotationHTML(data) {
+            let featuresHTML = '';
+            data.features.forEach(feature => {
+                featuresHTML += `<li>${feature}</li>`;
+            });
+            
+            // Add placeholder features if none provided
+            if (data.features.length === 0) {
+                featuresHTML = `
+                    <li><span class="placeholder-line" style="width: 90%;"></span></li>
+                    <li><span class="placeholder-line" style="width: 80%;"></span></li>
+                    <li><span class="placeholder-line" style="width: 70%;"></span></li>
+                `;
+            }
+            
+            let itemsHTML = '';
+            data.items.forEach((item, index) => {
+                itemsHTML += `
+                    <tr>
+                        <td>${item.feature}</td>
+                        <td>${item.description}</td>
+                        <td class="amount-col">₹${item.amount}</td>
+                    </tr>
+                `;
+            });
+            
+            // Add empty rows to match the original layout
+            const MIN_ROWS = 5;
+            const emptyRowCount = Math.max(0, MIN_ROWS - data.items.length);
+            for (let i = 0; i < emptyRowCount; i++) {
+                itemsHTML += `<tr><td></td><td></td><td class="amount-col"></td></tr>`;
+            }
+            
+            return `
+                <div class="quotation-template" id="quotation-page-1">
+                    <div class="quotation-header-top">
+                        <div class="quotation-logo-left">
+                            <h1>KARMIC NEXUS</h1>
+                            <div class="tagline">IT Solutions</div>
+                            <div class="tagline">COMPANY</div>
+                        </div>
+                        <div class="quotation-logo-right">
+                            <div class="logo-placeholder">KARMIC NEXUS</div>
+                            <div class="logo-placeholder-text">IT Solutions COMPANY</div>
+                        </div>
+                    </div>
+
+                    <div class="quotation-content">
+                        <div class="quotation-recipient-info">
+                            To: <span class="placeholder-line" style="width: 300px;">${data.clientName}</span><br>
+                            Address: <span class="placeholder-line" style="width: 400px;">${data.clientAddress}</span><br>
+                        </div>
+
+                        <div class="quotation-project-details">
+                            <h2>Name Of Project- ${data.projectName}</h2>
+                            <p>Description About project Point Wise</p>
+                            <ul class="quotation-description-list">
+                                ${featuresHTML}
+                            </ul>
+                        </div>
+
+                        <table class="quotation-pricing-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%;">Feature</th>
+                                    <th style="width: 45%;">Description</th>
+                                    <th class="amount-col">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHTML}
+                                <tr class="total-row">
+                                    <td colspan="2">Total</td>
+                                    <td class="amount-col">₹${data.totalAmount}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="quotation-footer-bg-area" style="height: 120px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);">
+                    </div>
+                    <div class="quotation-contact-info" style="bottom: 20px; color: white;">
+                        KARMIC
+                    </div>
+                </div>
+                
+                <div class="quotation-template" id="quotation-page-2">
+                    <div class="quotation-header-top">
+                        <div class="quotation-logo-left">
+                            <h1>KARMIC NEXUS</h1>
+                            <div class="tagline">IT Solutions</div>
+                            <div class="tagline">COMPANY</div>
+                        </div>
+                        <div class="quotation-logo-right">
+                            <div class="logo-placeholder">KARMIC NEXUS</div>
+                            <div class="logo-placeholder-text">IT Solutions COMPANY</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quotation-terms-page">
+                        <h3>Terms & Conditions :</h3>
+                        <ol class="quotation-terms-list">
+                            <li>
+                                The project timeline will be <span class="term-placeholder">${data.timelineDays}</span> Days <span class="term-placeholder">${data.timelineMonths}</span> Months from the date of confirmation.
+                                <span class="urgent-note">*Additional charges for urgent work.*</span>
+                            </li>
+                            <li>
+                                <span class="term-placeholder" style="width: 40px;">${data.advancePercentage}</span>% advance payment is required to initiate the project.
+                            </li>
+                            <li>
+                                Any additional features or modifications beyond the agreed scope may incur extra charges.
+                            </li>
+                            <li>
+                                In case any hardware component becomes faulty or damaged during testing, integration, or demonstration, <strong>additional charges may apply</strong> for the replacement of the affected component(s). The final project cost may vary accordingly, based on actual component availability and market price at the time of purchase.
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div class="quotation-footer-bg-area">
+                        <div class="quotation-contact-info">
+                            <h3>Contact Us:</h3>
+                            <ul class="quotation-contact-info-list">
+                                <li>8080420394 | 9527895390 | 9405752896</li>
+                                <li>www.karmicnexus.com</li>
+                                <li>karmicnexus.contact@gmail.com</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function editInvoice() {
+            document.getElementById('invoicePreview').classList.add('hidden');
+            document.getElementById('invoiceForm').classList.remove('hidden');
+        }
+        
+        function editQuotation() {
+            document.getElementById('quotationPreview').classList.add('hidden');
+            document.getElementById('quotationForm').classList.remove('hidden');
+        }
+        
+        // This function combines preview and download for the main button
+        function generatePDF() {
+            previewInvoice();
+            // Wait a moment for the DOM to update, then call download
+            setTimeout(downloadPDF, 100); 
+        }
+
+        function generateQuotationPDF() {
+            previewQuotation();
+            // Wait a moment for the DOM to update, then call download
+            setTimeout(downloadQuotationPDF, 100); 
+        }
+
+        /**
+         * Downloads the currently displayed invoice preview as a PDF.
+         * Uses html2canvas to render the HTML into an image and jsPDF to place the image into a PDF.
+         */
+        function downloadPDF() {
+            // Get the element to be converted (the actual invoice template div)
+            const element = document.getElementById('previewContent').querySelector('.invoice-template');
+            
+            if (!element) {
+                alert("Invoice preview content not found. Please click 'Preview Invoice' first.");
+                return;
+            }
+
+            const filename = `Invoice_${document.getElementById('invoiceNumber').value}.pdf`;
+
+            // Temporarily hide parts not relevant to the final invoice (like the PDF buttons inside the preview)
+            const buttonsContainer = document.querySelector('#invoicePreview .text-center.mt-4');
+            buttonsContainer.style.display = 'none';
+
+            // Disable scrollbar for cleaner image rendering
+            document.body.style.overflow = 'hidden';
+
+            html2canvas(element, { 
+                scale: 2, // Higher scale for better resolution
+                logging: false, 
+                useCORS: true,
+                allowTaint: true 
+            }).then(canvas => {
+                // Restore hidden parts and scrollbar
+                buttonsContainer.style.display = 'block';
+                document.body.style.overflow = 'auto';
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4'); // A4 dimensions
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                
+                let position = 0;
+
+                // 1. Add the first image segment
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                // 2. Handle multi-page content (for very long invoices)
+                while (heightLeft >= -1) { // -1 to capture partial pages
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                // Download the PDF
+                pdf.save(filename);
+                
+            }).catch(error => {
+                // Ensure everything is restored even if it fails
+                const buttonsContainer = document.querySelector('#invoicePreview .text-center.mt-4');
+                if (buttonsContainer) buttonsContainer.style.display = 'block';
+                document.body.style.overflow = 'auto';
+                console.error("PDF Generation Error:", error);
+                alert("Could not generate PDF. Please check the console for details.");
+            });
+        }
+
+        function downloadQuotationPDF() {
+            // Get the elements to be converted (both quotation pages)
+            const page1 = document.getElementById('quotation-page-1');
+            const page2 = document.getElementById('quotation-page-2');
+            
+            if (!page1 || !page2) {
+                alert("Quotation preview content not found. Please click 'Preview Quotation' first.");
+                return;
+            }
+
+            const filename = `Quotation_${document.getElementById('quotationNumber').value}.pdf`;
+
+            // Temporarily hide parts not relevant to the final quotation (like the PDF buttons inside the preview)
+            const buttonsContainer = document.querySelector('#quotationPreview .text-center.mt-4');
+            buttonsContainer.style.display = 'none';
+
+            // Disable scrollbar for cleaner image rendering
+            document.body.style.overflow = 'hidden';
+
+            // Create PDF
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4'); // A4 dimensions
+
+            // Function to capture and add a page to PDF
+            const captureAndAddPage = (element, pageNumber) => {
+                return new Promise((resolve, reject) => {
+                    html2canvas(element, { 
+                        scale: 2, // Higher scale for better resolution
+                        logging: false, 
+                        useCORS: true,
+                        allowTaint: true 
+                    }).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const imgWidth = 210; // A4 width in mm
+                        const imgHeight = canvas.height * imgWidth / canvas.width;
+                        
+                        if (pageNumber > 1) {
+                            pdf.addPage();
+                        }
+                        
+                        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                        resolve();
+                    }).catch(error => {
+                        reject(error);
+                    });
+                });
+            };
+
+            // Capture both pages and add to PDF
+            Promise.all([
+                captureAndAddPage(page1, 1),
+                captureAndAddPage(page2, 2)
+            ]).then(() => {
+                // Restore hidden parts and scrollbar
+                buttonsContainer.style.display = 'block';
+                document.body.style.overflow = 'auto';
+
+                // Download the PDF
+                pdf.save(filename);
+            }).catch(error => {
+                // Ensure everything is restored even if it fails
+                buttonsContainer.style.display = 'block';
+                document.body.style.overflow = 'auto';
+                console.error("PDF Generation Error:", error);
+                alert("Could not generate PDF. Please check the console for details.");
+            });
+        }
+    </script>
+</body>
+</html>
